@@ -1,5 +1,6 @@
 from gui.main_window import MainWindow
-import asyncio
+# from optionscli.options_alarm import SetOptions
+# import asyncio
 
 def main():
     main_window = MainWindow()
