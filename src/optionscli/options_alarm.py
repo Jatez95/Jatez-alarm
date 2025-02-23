@@ -95,28 +95,3 @@ class SetOptions:
             if pathlib.Path(f).suffix in (".wav", ".mp3"):
                 onlyfiles.append(f)
         print(onlyfiles)
-    
-    def obtain_user_path(self):
-        """
-        Obtain the user drive letter example ('C' or 'D')
-        then checks if the Users folder is in it
-        Example: if Users folder is in C or D will assign user_route this route: C:/Users/user_name
-        this route will be used to see the sounds of the alarm 
-        """
-        user_route = ''
-        drives = []
-        bitmask = windll.kernel32.GetLogicalDrives() # Copied from stackoverflow
-        for letter in string.ascii_uppercase:
-            if bitmask & 1:
-                drives.append(letter)
-            bitmask >>= 1
-        
-        for letter in drives:
-            disk_folder = os.listdir(f"{letter}:/") # My creationçç
-            if 'Users' in disk_folder:
-                user_route = f"{letter}:/Users/{os.getlogin()}"
-            
-        if not os.path.isdir(f"{user_route}/Music/alarm-sounds"):
-            pathlib.Path(user_route, "Music", "alarm-sounds").mkdir(parents=True, exist_ok=True)
-
-        return user_route

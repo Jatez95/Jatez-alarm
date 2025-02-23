@@ -1,10 +1,10 @@
 from gui.main_window import MainWindow
 # from optionscli.options_alarm import SetOptions
-# import asyncio
+import asyncio
 
-def main():
+async def main():
     main_window = MainWindow()
-    main_window.mainloop()
+    await main_window.mainloop()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
