@@ -1,5 +1,6 @@
 import tkinter as tk
-from gui.alarm_gui import AlarmComponent, TimerComponent
+from gui.alarm_gui import AlarmComponent
+from gui.timer_gui import TimerComponent
 from gui.download_gui import DownloadComponent
 from tkinter import ttk
 import asyncio
