@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-
+import datetime
 
 class TimerComponent(ttk.Frame):
 
@@ -36,7 +36,7 @@ class TimerComponent(ttk.Frame):
         self.seconds_spinbox = ttk.Spinbox(time_frame, from_=0, to=59, width=6)
         self.seconds_spinbox.grid(row=0, column=4, padx=2)
         
-        self.start_button = ttk.Button(self.left_frame, text="Start")
+        self.start_button = ttk.Button(self.left_frame, text="Start", command=self.timer_window)
         self.start_button.grid(row=2, column=0, columnspan=3, pady=(0, 10))
 
         # Right section - Just sound selection
@@ -50,4 +50,82 @@ class TimerComponent(ttk.Frame):
         self.alarm_sound_selected.grid(row=1, column=0)
 
     def get_timer(self):
-        return self.hour_spinbox, self.minute_spinbox, self.seconds_spinbox
+        time = f"{self.hour_spinbox.get():02}:{self.minute_spinbox.get():02}:{self.seconds_spinbox.get():02}"
+        to_datetime = datetime.datetime.strptime(time, "%H:%M:%S")
+        return to_datetime
+    
+    def timer_window(self):
+        top_window = tk.Toplevel(self)
+        top_window.title("Timer")
+        top_window.geometry("300x200")
+        timer = self.get_timer()
+
+        self.text_var = tk.StringVar()
+        self.text_var.set(f"{timer.hour:02}:{timer.minute:02}:{timer.second:02}")
+
+        self.is_paused = tk.BooleanVar()
+        self.is_paused.set(False)
+
+        # Create a main frame to hold all elements
+        main_frame = ttk.Frame(top_window)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Pack elements into the centered frame
+        self.top_label = ttk.Label(main_frame, textvariable = self.text_var)
+        self.top_label.pack(pady=10)
+        
+
+        self.stop_button = ttk.Button(main_frame, text="Stop", command=self.pause_timer)
+        self.stop_button.pack(pady=5)
+
+        button_close = ttk.Button(main_frame, text="Close", command = lambda:self.close_top_window(top_window))
+        button_close.pack(pady=5)
+
+        self.update_timer()
+
+    def update_timer(self):
+        
+        timer = datetime.datetime.strptime(self.text_var.get(), "%H:%M:%S")
+
+
+        all_seconds = timer.hour * 3600 +  timer.minute * 60 + timer.second
+
+        if self.is_paused.get() == False:
+
+            if all_seconds == 0:
+                self.text_var.set("Time is over")
+            else:
+                all_seconds = all_seconds - 1
+
+
+                seconds = all_seconds % 60
+                minutes = int(all_seconds / 60) % 60
+                hours = int(all_seconds / 3600)
+
+                timer = datetime.datetime.strptime(f"{str(hours)}:{str(minutes)}:{str(seconds)}", "%H:%M:%S")
+
+                self.text_var.set(f"{timer.hour:02}:{timer.minute:02}:{timer.second:02}")
+
+                self.top_label.config(textvariable = self.text_var)
+                self.top_label.after(1000, self.update_timer)
+            
+    
+    def pause_timer(self):
+        self.is_paused.set(True)
+
+        self.stop_button.config(text="Continue", command=self.continue_timer)
+
+    def continue_timer(self):
+        self.is_paused.set(False)
+
+        self.update_timer()
+
+        self.stop_button.config(text="Stop", command=self.pause_timer)
+        
+
+    
+
+
+    
+    def close_top_window(self, top_window):
+        top_window.destroy()
