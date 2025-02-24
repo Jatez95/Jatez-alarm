@@ -1,12 +1,16 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 import datetime
+from alarm.sound_player import SoundPlayer
+from downloader.yt_downloader import YTDLSource
 
 class TimerComponent(ttk.Frame):
 
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.timer_widgets()
+        self.sound_player = SoundPlayer()
+        self.sound_file_route = ''
 
     def timer_widgets(self):
         self.left_frame = ttk.Frame(self)
@@ -43,13 +47,30 @@ class TimerComponent(ttk.Frame):
         sound_frame = ttk.Frame(self.right_frame)
         sound_frame.grid(row=8, column=0, pady=(20, 0))
         
-        self.select_sound = ttk.Button(sound_frame, text="Select Sound")
+        self.select_sound = ttk.Button(sound_frame, text="Select Sound", command=self.select_sound)
         self.select_sound.grid(row=0, column=0, pady=(0, 5))
         
         self.alarm_sound_selected = ttk.Label(sound_frame, text="Default Sound")
         self.alarm_sound_selected.grid(row=1, column=0)
+    
+    def select_sound(self):
+        user_route = YTDLSource().obtain_user_path()
+        self.sound_file_route = filedialog.askopenfilename(
+            filetypes=(("wav files", "*.wav"), ("mp3 files", "*,mp3"), ("all files", "*.*")), 
+            initialdir=f"{user_route}/Music/alarm-sounds"
+        )
+
+        sound_file = self.sound_file_route.split("/", -1)
+
+        sound_file = sound_file[-1]
+
+        self.alarm_sound_selected.config(text=sound_file.replace("_", " "))
+        print(self.sound_file_route)
+
+        
 
     def get_timer(self):
+        
         time = f"{self.hour_spinbox.get():02}:{self.minute_spinbox.get():02}:{self.seconds_spinbox.get():02}"
         to_datetime = datetime.datetime.strptime(time, "%H:%M:%S")
         return to_datetime
@@ -94,6 +115,7 @@ class TimerComponent(ttk.Frame):
 
             if all_seconds == 0:
                 self.text_var.set("Time is over")
+                self.sound_player.playsound(self.sound_file_route)
             else:
                 all_seconds = all_seconds - 1
 
